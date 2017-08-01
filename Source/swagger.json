@@ -1,0 +1,416 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Title",
+    "version": "1.0.0"
+  },
+  "paths": {
+  },
+  "definitions": {
+    "Room1": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "location",
+        "date",
+        "prices",
+        "statuses"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "minAttendees": {
+          "type": "number"
+        },
+        "maxAttendees": {
+          "type": "number"
+        },
+        "location": {
+          "$ref": "#/definitions/Location"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "date": {
+          "type": "string"
+        },
+        "prices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Price"
+          }
+        },
+        "statuses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Status"
+          }
+        }
+      }
+    },
+    "Status": {
+      "type": "object",
+      "required": [
+        "date",
+        "status",
+        "timePeriod"
+      ],
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "timePeriod": {
+          "$ref": "#/definitions/TimePeriod"
+        }
+      }
+    },
+    "Price": {
+      "type": "object",
+      "required": [
+        "date",
+        "price",
+        "timePeriod"
+      ],
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number"
+        },
+        "timePeriod": {
+          "$ref": "#/definitions/TimePeriod"
+        }
+      }
+    },
+    "TimePeriod": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "startTime",
+        "endTime"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "startTime": {
+          "type": "string"
+        },
+        "endTime": {
+          "type": "string"
+        }
+      }
+    },
+    "Location": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "addressLine1"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "abbreviation": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "neighborhood": {
+          "type": "string"
+        },
+        "addressLine1": {
+          "type": "string"
+        },
+        "addressLine2": {
+          "type": "string"
+        },
+        "postCode": {
+          "type": "string"
+        },
+        "metroArea": {
+          "type": "string"
+        },
+        "website": {
+          "type": "string"
+        },
+        "administrativeCharge": {
+          "type": "number"
+        },
+        "salesTax": {
+          "type": "number"
+        },
+        "cityLatitude": {
+          "type": "number"
+        },
+        "cityLongitude": {
+          "type": "number"
+        }
+      }
+    },
+    "Package": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "price"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "minAttendees": {
+          "type": "number"
+        },
+        "maxAttendees": {
+          "type": "number"
+        },
+        "price": {
+          "type": "number"
+        },
+        "preparationDuration": {
+          "type": "number"
+        }
+      }
+    },
+    "Booking": {
+      "type": "object",
+      "required": [
+        "id",
+        "reservation",
+        "billing",
+        "payment",
+        "userInfo"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "reservation": {
+          "$ref": "#/definitions/Reservation"
+        },
+        "billing": {
+          "$ref": "#/definitions/Billing"
+        },
+        "payment": {
+          "$ref": "#/definitions/Payment"
+        },
+        "userInfo": {
+          "$ref": "#/definitions/UserInfo"
+        }
+      }
+    },
+    "Room2": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "location"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "abbreviation": {
+          "type": "string"
+        },
+        "minAttendees": {
+          "type": "number"
+        },
+        "maxAttendees": {
+          "type": "number"
+        },
+        "location": {
+          "type": "string"
+        },
+        "images": {
+          "type": "string"
+        }
+      }
+    },
+    "Reservation": {
+      "type": "object",
+      "required": [
+        "date",
+        "timePeriod",
+        "room",
+        "price",
+        "package",
+        "userTotalPriceWithTaxes"
+      ],
+      "properties": {
+        "date": {
+          "type": "string",
+          "description": "Date in YYYY-MM-DD format"
+        },
+        "timePeriod": {
+          "$ref": "#/definitions/TimePeriod"
+        },
+        "attendeesCount": {
+          "type": "number"
+        },
+        "room": {
+          "$ref": "#/definitions/Room2"
+        },
+        "price": {
+          "type": "number"
+        },
+        "package": {
+          "$ref": "#/definitions/Package"
+        },
+        "userTotalPriceWithTaxes": {
+          "type": "number"
+        }
+      }
+    },
+    "Billing": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "company": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zipCode": {
+          "type": "string"
+        }
+      }
+    },
+    "Payment": {
+      "type": "object",
+      "required": [
+        "id",
+        "token"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        }
+      }
+    },
+    "UserInfo": {
+      "type": "object",
+      "required": [
+        "id",
+        "firstName"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        }
+      }
+    },
+    "Card": {
+      "type": "object",
+      "properties": {
+        "brand": {
+          "type": "string"
+        },
+        "funding": {
+          "type": "string"
+        },
+        "last4": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "addressZip": {
+          "type": "string"
+        }
+      }
+    },
+    "Receipt": {
+      "type": "object",
+      "required": [
+        "id",
+        "reservation",
+        "card"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "reservation": {
+          "$ref": "#/definitions/Reservation"
+        },
+        "card": {
+          "$ref": "#/definitions/Card"
+        }
+      }
+    }
+  }
+}
