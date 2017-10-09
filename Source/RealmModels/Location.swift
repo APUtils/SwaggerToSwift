@@ -2,7 +2,7 @@
 //  Location.swift
 //  <#PROJECT_NAME#>
 //
-//  Created by mac-246 on 08/01/17.
+//  Created by mac-246 on 10/09/17.
 //  Copyright © 2017 <#COMPANY_NAME#>. All rights reserved.
 //
 

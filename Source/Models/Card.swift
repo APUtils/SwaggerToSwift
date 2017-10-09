@@ -2,7 +2,7 @@
 //  Card.swift
 //  <#PROJECT_NAME#>
 //
-//  Created by mac-246 on 08/01/17.
+//  Created by mac-246 on 10/09/17.
 //  Copyright © 2017 <#COMPANY_NAME#>. All rights reserved.
 //
 
@@ -19,7 +19,13 @@ struct Card: Mappable, Describable {
     var name: String?
     var addressZip: String?
 
-    init() {}
+    init(brand: String? = nil, funding: String? = nil, last4: String? = nil, name: String? = nil, addressZip: String? = nil) {
+        self.brand = brand
+        self.funding = funding
+        self.last4 = last4
+        self.name = name
+        self.addressZip = addressZip
+    }
 
     init?(map: Map) {}
 

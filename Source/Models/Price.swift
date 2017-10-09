@@ -2,7 +2,7 @@
 //  Price.swift
 //  <#PROJECT_NAME#>
 //
-//  Created by mac-246 on 08/01/17.
+//  Created by mac-246 on 10/09/17.
 //  Copyright © 2017 <#COMPANY_NAME#>. All rights reserved.
 //
 
@@ -17,7 +17,11 @@ struct Price: Mappable, Describable {
     var price: Double!
     var timePeriod: TimePeriod!
 
-    init() {}
+    init(date: String? = nil, price: Double? = nil, timePeriod: TimePeriod? = nil) {
+        self.date = date
+        self.price = price
+        self.timePeriod = timePeriod
+    }
 
     init?(map: Map) {
         guard map.assureValuePresent(forKey: "date") else { return nil }

@@ -2,7 +2,7 @@
 //  UserInfo.swift
 //  <#PROJECT_NAME#>
 //
-//  Created by mac-246 on 08/01/17.
+//  Created by mac-246 on 10/09/17.
 //  Copyright © 2017 <#COMPANY_NAME#>. All rights reserved.
 //
 
@@ -19,7 +19,13 @@ struct UserInfo: Mappable, Describable {
     var email: String?
     var phone: String?
 
-    init() {}
+    init(id: String? = nil, firstName: String? = nil, lastName: String? = nil, email: String? = nil, phone: String? = nil) {
+        self.id = id
+        self.firstName = firstName
+        self.lastName = lastName
+        self.email = email
+        self.phone = phone
+    }
 
     init?(map: Map) {
         guard map.assureValuePresent(forKey: "id") else { return nil }

@@ -2,7 +2,7 @@
 //  Billing.swift
 //  <#PROJECT_NAME#>
 //
-//  Created by mac-246 on 08/01/17.
+//  Created by mac-246 on 10/09/17.
 //  Copyright © 2017 <#COMPANY_NAME#>. All rights reserved.
 //
 
@@ -20,7 +20,14 @@ struct Billing: Mappable, Describable {
     var state: String?
     var zipCode: String?
 
-    init() {}
+    init(id: String? = nil, company: String? = nil, address: String? = nil, city: String? = nil, state: String? = nil, zipCode: String? = nil) {
+        self.id = id
+        self.company = company
+        self.address = address
+        self.city = city
+        self.state = state
+        self.zipCode = zipCode
+    }
 
     init?(map: Map) {
         guard map.assureValuePresent(forKey: "id") else { return nil }

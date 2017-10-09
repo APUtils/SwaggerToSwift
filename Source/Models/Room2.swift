@@ -2,7 +2,7 @@
 //  Room2.swift
 //  <#PROJECT_NAME#>
 //
-//  Created by mac-246 on 08/01/17.
+//  Created by mac-246 on 10/09/17.
 //  Copyright © 2017 <#COMPANY_NAME#>. All rights reserved.
 //
 
@@ -21,7 +21,15 @@ struct Room2: Mappable, Describable {
     var location: String!
     var images: String?
 
-    init() {}
+    init(id: String? = nil, name: String? = nil, abbreviation: String? = nil, minAttendees: Double? = nil, maxAttendees: Double? = nil, location: String? = nil, images: String? = nil) {
+        self.id = id
+        self.name = name
+        self.abbreviation = abbreviation
+        self.minAttendees = minAttendees
+        self.maxAttendees = maxAttendees
+        self.location = location
+        self.images = images
+    }
 
     init?(map: Map) {
         guard map.assureValuePresent(forKey: "id") else { return nil }

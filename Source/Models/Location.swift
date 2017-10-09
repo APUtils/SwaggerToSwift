@@ -2,7 +2,7 @@
 //  Location.swift
 //  <#PROJECT_NAME#>
 //
-//  Created by mac-246 on 08/01/17.
+//  Created by mac-246 on 10/09/17.
 //  Copyright © 2017 <#COMPANY_NAME#>. All rights reserved.
 //
 
@@ -32,7 +32,26 @@ struct Location: Mappable, Describable {
     var cityLatitude: Double?
     var cityLongitude: Double?
 
-    init() {}
+    init(id: String? = nil, name: String? = nil, abbreviation: String? = nil, email: String? = nil, phone: String? = nil, country: String? = nil, state: String? = nil, city: String? = nil, neighborhood: String? = nil, addressLine1: String? = nil, addressLine2: String? = nil, postCode: String? = nil, metroArea: String? = nil, website: String? = nil, administrativeCharge: Double? = nil, salesTax: Double? = nil, cityLatitude: Double? = nil, cityLongitude: Double? = nil) {
+        self.id = id
+        self.name = name
+        self.abbreviation = abbreviation
+        self.email = email
+        self.phone = phone
+        self.country = country
+        self.state = state
+        self.city = city
+        self.neighborhood = neighborhood
+        self.addressLine1 = addressLine1
+        self.addressLine2 = addressLine2
+        self.postCode = postCode
+        self.metroArea = metroArea
+        self.website = website
+        self.administrativeCharge = administrativeCharge
+        self.salesTax = salesTax
+        self.cityLatitude = cityLatitude
+        self.cityLongitude = cityLongitude
+    }
 
     init?(map: Map) {
         guard map.assureValuePresent(forKey: "id") else { return nil }

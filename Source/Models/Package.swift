@@ -2,7 +2,7 @@
 //  Package.swift
 //  <#PROJECT_NAME#>
 //
-//  Created by mac-246 on 08/01/17.
+//  Created by mac-246 on 10/09/17.
 //  Copyright © 2017 <#COMPANY_NAME#>. All rights reserved.
 //
 
@@ -22,7 +22,16 @@ struct Package: Mappable, Describable {
     var price: Double!
     var preparationDuration: Double?
 
-    init() {}
+    init(id: String? = nil, name: String? = nil, displayName: String? = nil, description: String? = nil, minAttendees: Double? = nil, maxAttendees: Double? = nil, price: Double? = nil, preparationDuration: Double? = nil) {
+        self.id = id
+        self.name = name
+        self.displayName = displayName
+        self.description = description
+        self.minAttendees = minAttendees
+        self.maxAttendees = maxAttendees
+        self.price = price
+        self.preparationDuration = preparationDuration
+    }
 
     init?(map: Map) {
         guard map.assureValuePresent(forKey: "id") else { return nil }

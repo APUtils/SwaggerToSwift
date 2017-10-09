@@ -2,7 +2,7 @@
 //  Reservation.swift
 //  <#PROJECT_NAME#>
 //
-//  Created by mac-246 on 08/01/17.
+//  Created by mac-246 on 10/09/17.
 //  Copyright © 2017 <#COMPANY_NAME#>. All rights reserved.
 //
 
@@ -21,7 +21,15 @@ struct Reservation: Mappable, Describable {
     var package: Package!
     var userTotalPriceWithTaxes: Double!
 
-    init() {}
+    init(date: String? = nil, timePeriod: TimePeriod? = nil, attendeesCount: Double? = nil, room: Room2? = nil, price: Double? = nil, package: Package? = nil, userTotalPriceWithTaxes: Double? = nil) {
+        self.date = date
+        self.timePeriod = timePeriod
+        self.attendeesCount = attendeesCount
+        self.room = room
+        self.price = price
+        self.package = package
+        self.userTotalPriceWithTaxes = userTotalPriceWithTaxes
+    }
 
     init?(map: Map) {
         guard map.assureValuePresent(forKey: "date") else { return nil }

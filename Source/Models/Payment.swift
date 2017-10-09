@@ -2,7 +2,7 @@
 //  Payment.swift
 //  <#PROJECT_NAME#>
 //
-//  Created by mac-246 on 08/01/17.
+//  Created by mac-246 on 10/09/17.
 //  Copyright © 2017 <#COMPANY_NAME#>. All rights reserved.
 //
 
@@ -16,7 +16,10 @@ struct Payment: Mappable, Describable {
     var id: String!
     var token: String!
 
-    init() {}
+    init(id: String? = nil, token: String? = nil) {
+        self.id = id
+        self.token = token
+    }
 
     init?(map: Map) {
         guard map.assureValuePresent(forKey: "id") else { return nil }

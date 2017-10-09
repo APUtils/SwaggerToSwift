@@ -2,7 +2,7 @@
 //  Booking.swift
 //  <#PROJECT_NAME#>
 //
-//  Created by mac-246 on 08/01/17.
+//  Created by mac-246 on 10/09/17.
 //  Copyright © 2017 <#COMPANY_NAME#>. All rights reserved.
 //
 
@@ -19,7 +19,13 @@ struct Booking: Mappable, Describable {
     var payment: Payment!
     var userInfo: UserInfo!
 
-    init() {}
+    init(id: String? = nil, reservation: Reservation? = nil, billing: Billing? = nil, payment: Payment? = nil, userInfo: UserInfo? = nil) {
+        self.id = id
+        self.reservation = reservation
+        self.billing = billing
+        self.payment = payment
+        self.userInfo = userInfo
+    }
 
     init?(map: Map) {
         guard map.assureValuePresent(forKey: "id") else { return nil }

@@ -2,7 +2,7 @@
 //  Receipt.swift
 //  <#PROJECT_NAME#>
 //
-//  Created by mac-246 on 08/01/17.
+//  Created by mac-246 on 10/09/17.
 //  Copyright © 2017 <#COMPANY_NAME#>. All rights reserved.
 //
 
@@ -17,7 +17,11 @@ struct Receipt: Mappable, Describable {
     var reservation: Reservation!
     var card: Card!
 
-    init() {}
+    init(id: String? = nil, reservation: Reservation? = nil, card: Card? = nil) {
+        self.id = id
+        self.reservation = reservation
+        self.card = card
+    }
 
     init?(map: Map) {
         guard map.assureValuePresent(forKey: "id") else { return nil }
