@@ -1,9 +1,9 @@
 //
 //  Status.swift
-//  <#PROJECT_NAME#>
+//  SwaggerToSwift
 //
-//  Created by mac-246 on 10/09/17.
-//  Copyright © 2017 <#COMPANY_NAME#>. All rights reserved.
+//  Created by Anton Plebanovich on 10/09/17.
+//  Copyright © 2017 Anton Plebanovich. All rights reserved.
 //
 
 import Foundation

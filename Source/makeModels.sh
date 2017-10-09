@@ -20,6 +20,7 @@ type_casting_enabled=true # Enable type casting?
 describable_enabled=true # Add Describable protocol conformance?
 assert_values=true # Add value assertion checks? Only asserts mandatory values.
 project_name="<#PROJECT_NAME#>" # Project name for header
+user_name="$(echo $USER || git config user.name)" # User name for header
 company_name="<#COMPANY_NAME#>" # Company name for header
 
 # Params parsing
@@ -34,6 +35,7 @@ usage() {
     echo "\t-de\t--describable-enabled\t\t\tAdd Describable protocol conformance? Default - true."
     echo "\t-a\t--assert-values\t\t\t\tAdd value assertion checks? Only asserts mandatory values. Default - true."
     echo "\t-p\t--project-name\t\t\t\tProject name for header. Default - <#PROJECT_NAME#>."
+    echo "\t-u\t--user-name\t\t\t\tCompany name for header. Default - $USER or git user name."
     echo "\t-c\t--company-name\t\t\t\tCompany name for header. Default - <#COMPANY_NAME#>."
     echo ""
 }
@@ -80,6 +82,10 @@ while [[ "$1" != "" ]]; do
             ;;
         -p | --project-name)
             project_name=$VALUE
+            shift 2
+            ;;
+        -u | --user-name)
+            user_name=$VALUE
             shift 2
             ;;
         -c | --company-name)
@@ -207,7 +213,6 @@ for definition in $definitions; do
         imports_string="${imports_string}import ObjectMapperAdditions\n"
     fi
 
-    user_name="$(echo $USER || git config user.name)"
     printf "//\n//  $definition.swift\n//  $project_name\n//\n//  Created by $user_name on $(date +'%m/%d/%y').\n//  Copyright © $(date +'%Y') $company_name. All rights reserved.\n//\n\n$imports_string\n\n" > "$output_filename"
 
 ################################# Properties #################################

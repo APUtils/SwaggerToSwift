@@ -19,6 +19,7 @@ type_casting_enabled=true # Enable type casting?
 assert_values=true # Add value assertion checks? Only asserts mandatory values.
 override_isEqual=true # Override Realm implementation of objects equality with properties comparison?
 project_name="<#PROJECT_NAME#>" # Project name for header
+user_name="$(echo $USER || git config user.name)" # User name for header
 company_name="<#COMPANY_NAME#>" # Company name for header
 
 # Params parsing
@@ -33,6 +34,7 @@ usage() {
     echo "\t-a\t--assert-values\t\t\t\tAdd value assertion checks? Only asserts mandatory values. Default - true."
     echo "\t-oi\t--override-isEqual\t\t\t\tOverride Realm implementation of objects equality with properties comparison? Default - true."
     echo "\t-p\t--project-name\t\t\t\tProject name for header. Default - <#PROJECT_NAME#>."
+    echo "\t-u\t--user-name\t\t\t\tCompany name for header. Default - $USER or git user name."
     echo "\t-c\t--company-name\t\t\t\tCompany name for header. Default - <#COMPANY_NAME#>."
     echo ""
 }
@@ -79,6 +81,10 @@ while [[ "$1" != "" ]]; do
             ;;
         -p | --project-name)
             project_name=$VALUE
+            shift 2
+            ;;
+        -u | --user-name)
+            user_name=$VALUE
             shift 2
             ;;
         -c | --company-name)
