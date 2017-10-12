@@ -32,6 +32,7 @@ usage() {
     echo "\t-f\t--file\t\t\t\t\tSwagger spec JSON file name. Default - 'swagger.json'."
     echo "\t-o\t--output-dir\t\t\t\t\tModels output directory. Default - same as script file location."
     echo "\t-t\t--type-casting-enabled\t\t\tEnable type casting? Default - true."
+    echo "\t-m\t--model-name\t\t\t\t\tSpecify concrete model name to parse."
     echo "\t-de\t--describable-enabled\t\t\tAdd Describable protocol conformance? Default - true."
     echo "\t-a\t--assert-values\t\t\t\tAdd value assertion checks? Only asserts mandatory values. Default - true."
     echo "\t-p\t--project-name\t\t\t\tProject name for header. Default - <#PROJECT_NAME#>."
@@ -68,6 +69,10 @@ while [[ "$1" != "" ]]; do
         -t | --type-casting-enabled)
             assertBoolParam $VALUE
             type_casting_enabled=$VALUE
+            shift 2
+            ;;
+        -m | --model-name)
+            model_name=$VALUE
             shift 2
             ;;
         -de | --describable-enabled)
@@ -155,6 +160,213 @@ getSwiftTypeAndTransformType () {
     fi
 }
 
+# $1 - model name
+# $2 - model dictionary
+parseModel() {
+    local loc_model_name=$1 #$definition
+    local loc_model_dictionary=$2 #$definition_dictionary
+
+    # Creating models only for objects
+    if [ "$(echo $loc_model_dictionary | jq -r .type)" != "object" ]; then
+        continue
+    fi
+
+    # Output file
+    local loc_output_filename="${output_dir}/${loc_model_name}.swift"
+
+    printf "Generating '${loc_model_name}.swift' model..."
+
+################################# Header and Imports #################################
+    # Creating file with header and imports
+    local loc_imports_string="import Foundation\n"
+
+    if $describable_enabled ; then
+        loc_imports_string="${loc_imports_string}import APExtensions\n"
+    fi
+
+    loc_imports_string="${loc_imports_string}import ObjectMapper\n"
+
+    if $type_casting_enabled || $assert_values ; then
+        loc_imports_string="${loc_imports_string}import ObjectMapperAdditions\n"
+    fi
+
+    printf "//\n//  ${loc_model_name}.swift\n//  $project_name\n//\n//  Created by $user_name on $(date +'%m/%d/%y').\n//  Copyright © $(date +'%Y') $company_name. All rights reserved.\n//\n\n${loc_imports_string}\n\n" > "$loc_output_filename"
+
+################################# Properties #################################
+    # properties
+    local loc_properties="$(echo $loc_model_dictionary | jq -r '.properties | keys_unsorted | .[]')"
+
+    # Append file with struct declaration
+    if $describable_enabled ; then
+        local loc_protocols_string="Mappable, Describable"
+    else
+        local loc_protocols_string="Mappable"
+    fi
+    printf "struct $loc_model_name: $loc_protocols_string {\n" >> "$loc_output_filename"
+
+    # Get required fields if they exist
+    if [ "$(echo $loc_model_dictionary | jq -r 'has("required")')" == "true" ]; then
+        local loc_required_fields="$(echo $loc_model_dictionary | jq -r '.required | .[]')"
+    else
+        local loc_required_fields=""
+    fi
+
+    local loc_init_params=""
+    local loc_init_body=""
+
+    local loc_transform_types=()
+    local loc_property
+    for loc_property in $loc_properties; do
+        getAllowedPropertyName $loc_property
+        local loc_allowed_property_name=$allowed_property_name
+        # Swagger type
+        local loc_type="$(echo $loc_model_dictionary | jq -r .properties.${loc_property}.type)"
+
+        # Swagger format
+        local loc_format="$(echo $loc_model_dictionary | jq -r .properties.${loc_property}.format)"
+
+        # Handle object type
+        if [ "$loc_type" == "null" ]; then
+            loc_type="$(echo $loc_model_dictionary | jq -r .properties.${loc_property}.\"\$ref\" | cut -d/ -f3)"
+        fi
+
+        # Swift type
+        local loc_swift_type
+        local loc_transform_type
+        if getSwiftType "$loc_type"; then
+            loc_swift_type=$swift_type
+
+            # Set proper transform
+            getSwiftTypeAndTransformType $loc_format $loc_swift_type
+            loc_swift_type=$swift_type
+            loc_transform_type=$transform_type
+        elif [ "$loc_type" == "array" ]; then
+            local loc_array_subtype="$(echo $loc_model_dictionary | jq -r .properties.${loc_property}.items.type)"
+            local loc_array_format="$(echo $loc_model_dictionary | jq -r .properties.${loc_property}.items.format)"
+
+            # Handle object subtype
+            if [ "$loc_array_subtype" == "null" ]; then
+                loc_type="$(echo $loc_model_dictionary | jq -r .properties.${loc_property}.items.\"\$ref\" | cut -d/ -f3)"
+            fi
+
+            if getSwiftType "$loc_array_subtype"; then
+                loc_swift_type=$swift_type
+
+                # Set proper transform
+                getSwiftTypeAndTransformType $loc_array_format $loc_swift_type
+                loc_swift_type=$swift_type
+                loc_transform_type=$transform_type
+
+                loc_array_subtype=$loc_swift_type
+            else
+                loc_array_subtype=$loc_type
+                loc_transform_type="none"
+            fi
+
+            loc_swift_type="[$loc_array_subtype]"
+        else
+            loc_swift_type=$loc_type
+            loc_transform_type="none"
+        fi
+
+        if $type_casting_enabled ; then
+            # Use type casting
+            loc_transform_types+=($loc_transform_type)
+        else
+            # Do not transform
+            loc_transform_types+=("none")
+        fi
+
+        # Getting optionality type
+        local loc_optional_type="?"
+        if $assert_values; then
+            local loc_required_field
+            for loc_required_field in $loc_required_fields; do
+                if [[ "${loc_property}" == "${loc_required_field}" ]]; then
+                    loc_optional_type="!"
+                    break
+                fi
+            done
+        fi
+
+        # Append file with properties
+        printf "    var $loc_allowed_property_name: $loc_swift_type${loc_optional_type}\n" >> "$loc_output_filename"
+
+        # Append loc_init_params
+        if [[ -z $loc_init_params ]]; then
+            loc_init_params="$loc_allowed_property_name: $loc_swift_type? = nil"
+        else
+            loc_init_params="${loc_init_params}, $loc_allowed_property_name: $loc_swift_type? = nil"
+        fi
+
+        # Append loc_init_body
+        if [[ -z $loc_init_body ]]; then
+            loc_init_body="\n        self.$loc_allowed_property_name = $loc_allowed_property_name\n    "
+        else
+            loc_init_body="${loc_init_body}    self.$loc_allowed_property_name = $loc_allowed_property_name\n    "
+        fi
+    done
+    printf "\n" >> "$loc_output_filename"
+
+################################# Init #################################
+    # Append init section
+    printf "    init($loc_init_params) {$loc_init_body}\n\n" >> "$loc_output_filename"
+
+    if $assert_values && [[ ! -z $loc_required_fields ]]; then
+        printf "    init?(map: Map) {\n" >> "$loc_output_filename"
+        echo $loc_required_fields | xargs -n1 -I {} printf "        guard map.assureValuePresent(forKey: \"{}\") else { return nil }\n" >> "$loc_output_filename"
+        printf "    }\n\n" >> "$loc_output_filename"
+    else
+        printf "    init?(map: Map) {}\n\n" >> "$loc_output_filename"
+    fi
+
+################################# Mapping #################################
+    # Append mapping section
+    printf "    mutating func mapping(map: Map) {\n" >> "$loc_output_filename"
+    local loc_index=0
+    local loc_property
+    for loc_property in $loc_properties; do
+        getAllowedPropertyName $loc_property
+        local loc_allowed_property_name=$allowed_property_name
+
+        # Get map expression
+        local loc_map_expression
+        if [ "${loc_transform_types[$loc_index]}" == "none" ]; then
+            loc_map_expression="map[\"${loc_property}\"]"
+        else
+            loc_map_expression="(map[\"${loc_property}\"], ${loc_transform_types[$loc_index]}Transform())"
+        fi
+
+        printf "        ${loc_allowed_property_name} <- ${loc_map_expression}\n" >> "$loc_output_filename"
+        ((loc_index++))
+    done
+    printf "    }\n}\n\n" >> "$loc_output_filename"
+
+################################# Equatable #################################
+    # Append equatable section
+    printf "//-----------------------------------------------------------------------------\n" >> "$loc_output_filename"
+    printf "// MARK: - Equatable\n" >> "$loc_output_filename"
+    printf "//-----------------------------------------------------------------------------\n\n" >> "$loc_output_filename"
+    printf "extension $loc_model_name: Equatable {\n" >> "$loc_output_filename"
+    printf "    static func ==(lhs: $loc_model_name, rhs: $loc_model_name) -> Bool {\n" >> "$loc_output_filename"
+    if [[ -z $loc_properties ]]; then
+        printf "        return true\n" >> "$loc_output_filename"
+    else
+        local loc_linePrefix="        return "
+        local loc_property
+        local loc_allowed_property_name
+        for loc_property in $loc_properties; do
+            getAllowedPropertyName $loc_property
+            loc_allowed_property_name=$allowed_property_name
+
+            printf "${loc_linePrefix}lhs.${loc_allowed_property_name} == rhs.${loc_allowed_property_name}\n" >> "$loc_output_filename"
+            loc_linePrefix="            && "
+        done
+    fi
+    printf "    }\n" >> "$loc_output_filename"
+    printf "}\n" >> "$loc_output_filename"
+}
+
 # Requires `jq` installed - https://stedolan.github.io/jq/download/
 # brew install jq
 
@@ -187,189 +399,20 @@ mkdir -p "$output_dir"
 definitions="$(cat $source_filename | jq -r '.definitions | keys | .[]')"
 definitions_dictionary="$(cat $source_filename | jq -r .definitions)"
 for definition in $definitions; do
-    # Definition dictionary
-    definition_dictionary="$(echo $definitions_dictionary | jq -r .$definition)"
-
-    # Creating models only for objects
-    if [ "$(echo $definition_dictionary | jq -r .type)" != "object" ]; then
+    # Only parse specified model if name passed
+    if [[ ! -z $model_name && $model_name != $definition ]]; then
         continue
     fi
 
-    # Output file
-    output_filename="${output_dir}/${definition}.swift"
-    printf "Generating '${definition}.swift' model..."
+    # Definition dictionary
+    definition_dictionary="$(echo $definitions_dictionary | jq -r .$definition)"
 
-################################# Header and Imports #################################
-    # Creating file with header and imports
-    imports_string="import Foundation\n"
-
-    if $describable_enabled ; then
-        imports_string="${imports_string}import APExtensions\n"
-    fi
-
-    imports_string="${imports_string}import ObjectMapper\n"
-
-    if $type_casting_enabled || $assert_values ; then
-        imports_string="${imports_string}import ObjectMapperAdditions\n"
-    fi
-
-    printf "//\n//  $definition.swift\n//  $project_name\n//\n//  Created by $user_name on $(date +'%m/%d/%y').\n//  Copyright © $(date +'%Y') $company_name. All rights reserved.\n//\n\n$imports_string\n\n" > "$output_filename"
-
-################################# Properties #################################
-    # properties
-    properties="$(echo $definition_dictionary | jq -r '.properties | keys_unsorted | .[]')"
-
-    # Append file with struct declaration
-    if $describable_enabled ; then
-        protocols_string="Mappable, Describable"
-    else
-        protocols_string="Mappable"
-    fi
-    printf "struct $definition: $protocols_string {\n" >> "$output_filename"
-
-    # Get required fields if they exist
-    if [ "$(echo $definition_dictionary | jq -r 'has("required")')" == "true" ]; then
-        required_fields="$(echo $definition_dictionary | jq -r '.required | .[]')"
-    else
-        required_fields=""
-    fi
-
-    init_params=""
-    init_body=""
-
-    transform_types=()
-    for property in $properties; do
-        getAllowedPropertyName $property
-        # Swagger type
-        type="$(echo $definition_dictionary | jq -r .properties.$property.type)"
-
-        # Swagger format
-        format="$(echo $definition_dictionary | jq -r .properties.$property.format)"
-
-        # Handle object type
-        if [ "$type" == "null" ]; then
-            type="$(echo $definition_dictionary | jq -r .properties.$property.\"\$ref\" | cut -d/ -f3)"
-        fi
-
-        # Swift type
-        if getSwiftType "$type"; then
-            # Set proper transform
-            getSwiftTypeAndTransformType $format $swift_type
-        elif [ "$type" == "array" ]; then
-            array_subtype="$(echo $definition_dictionary | jq -r .properties.$property.items.type)"
-            array_format="$(echo $definition_dictionary | jq -r .properties.$property.items.format)"
-
-            # Handle object subtype
-            if [ "$array_subtype" == "null" ]; then
-                type="$(echo $definition_dictionary | jq -r .properties.$property.items.\"\$ref\" | cut -d/ -f3)"
-            fi
-
-            if getSwiftType "$array_subtype"; then
-                # Set proper transform
-                getSwiftTypeAndTransformType $array_format $swift_type
-                array_subtype=$swift_type
-            else
-                array_subtype=$type
-                transform_type="none"
-            fi
-
-            swift_type="[$array_subtype]"
-        else
-            swift_type=$type
-            transform_type="none"
-        fi
-
-        if $type_casting_enabled ; then
-            # Use type casting
-            transform_types+=($transform_type)
-        else
-            # Do not transform
-            transform_types+=("none")
-        fi
-
-        # Getting optionality type
-        optional_type="?"
-        if $assert_values; then
-            for required_field in $required_fields; do
-                if [[ "${property}" == "${required_field}" ]]; then
-                    optional_type="!"
-                    break
-                fi
-            done
-        fi
-
-        # Append file with properties
-        printf "    var $allowed_property_name: $swift_type$optional_type\n" >> "$output_filename"
-
-        # Append init_params
-        if [[ -z $init_params ]]; then
-            init_params="$allowed_property_name: $swift_type? = nil"
-        else
-            init_params="${init_params}, $allowed_property_name: $swift_type? = nil"
-        fi
-
-        # Append init_body
-        if [[ -z $init_body ]]; then
-            init_body="\n        self.$allowed_property_name = $allowed_property_name\n    "
-        else
-            init_body="${init_body}    self.$allowed_property_name = $allowed_property_name\n    "
-        fi
-    done
-    printf "\n" >> "$output_filename"
-
-################################# Init #################################
-    # Append init section
-    printf "    init($init_params) {$init_body}\n\n" >> "$output_filename"
-
-    if $assert_values && [[ ! -z $required_fields ]]; then
-        printf "    init?(map: Map) {\n" >> "$output_filename"
-        echo $required_fields | xargs -n1 -I {} printf "        guard map.assureValuePresent(forKey: \"{}\") else { return nil }\n" >> "$output_filename"
-        printf "    }\n\n" >> "$output_filename"
-    else
-        printf "    init?(map: Map) {}\n\n" >> "$output_filename"
-    fi
-
-################################# Mapping #################################
-    # Append mapping section
-    printf "    mutating func mapping(map: Map) {\n" >> "$output_filename"
-    index=0
-    for property in $properties; do
-        getAllowedPropertyName $property
-
-        # Get map expression
-        if [ "${transform_types[$index]}" == "none" ]; then
-            map_expression="map[\"${property}\"]"
-        else
-            map_expression="(map[\"${property}\"], ${transform_types[$index]}Transform())"
-        fi
-
-        printf "        ${allowed_property_name} <- ${map_expression}\n" >> "$output_filename"
-        ((index++))
-    done
-    printf "    }\n}\n\n" >> "$output_filename"
-
-################################# Equatable #################################
-    # Append equatable section
-    printf "//-----------------------------------------------------------------------------\n" >> "$output_filename"
-    printf "// MARK: - Equatable\n" >> "$output_filename"
-    printf "//-----------------------------------------------------------------------------\n\n" >> "$output_filename"
-    printf "extension $definition: Equatable {\n" >> "$output_filename"
-    printf "    static func ==(lhs: $definition, rhs: $definition) -> Bool {\n" >> "$output_filename"
-    if [[ -z $properties ]]; then
-        printf "        return true\n" >> "$output_filename"
-    else
-        linePrefix="        return "
-        for property in $properties; do
-            getAllowedPropertyName $property
-            printf "${linePrefix}lhs.${allowed_property_name} == rhs.${allowed_property_name}\n" >> "$output_filename"
-            linePrefix="            && "
-        done
-    fi
-    printf "    }\n" >> "$output_filename"
-    printf "}\n" >> "$output_filename"
+    # Parse model
+    parseModel "${definition}" "${definition_dictionary}"
 
     printf " ${green_color}OK${no_color}\n"
 done
 
 ################################# Done #################################
 printf "\n${green_color}Done${no_color}\n\n"
+
