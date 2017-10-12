@@ -228,6 +228,12 @@ parseModel() {
         # Handle object type
         if [ "$loc_type" == "null" ]; then
             loc_type="$(echo $loc_model_dictionary | jq -r .properties.${loc_property}.\"\$ref\" | cut -d/ -f3)"
+        elif [ "$loc_type" == "object" ]; then
+            # Parse inner model type
+            local loc_capitalized_property_name="$(tr '[:lower:]' '[:upper:]' <<< ${loc_property:0:1})${loc_property:1}"
+            local loc_inner_type_dictionary="$(echo $loc_model_dictionary | jq -r .properties.${loc_property})"
+            loc_type="${loc_model_name}${loc_capitalized_property_name}"
+            parseModel "${loc_type}" "${loc_inner_type_dictionary}"
         fi
 
         # Swift type
@@ -241,12 +247,18 @@ parseModel() {
             loc_swift_type=$swift_type
             loc_transform_type=$transform_type
         elif [ "$loc_type" == "array" ]; then
-            local loc_array_subtype="$(echo $loc_model_dictionary | jq -r .properties.${loc_property}.items.type)"
-            local loc_array_format="$(echo $loc_model_dictionary | jq -r .properties.${loc_property}.items.format)"
+            local loc_array_items="$(echo $loc_model_dictionary | jq -r .properties.${loc_property}.items)"
+            local loc_array_subtype="$(echo $loc_array_items | jq -r .type)"
+            local loc_array_format="$(echo $loc_array_items | jq -r .format)"
 
             # Handle object subtype
             if [ "$loc_array_subtype" == "null" ]; then
                 loc_type="$(echo $loc_model_dictionary | jq -r .properties.${loc_property}.items.\"\$ref\" | cut -d/ -f3)"
+            elif [ "$loc_array_subtype" == "object" ]; then
+                # Parse inner model type
+                local loc_capitalized_array_property_name="$(tr '[:lower:]' '[:upper:]' <<< ${loc_property:0:1})${loc_property:1}"
+                loc_type="${loc_model_name}${loc_capitalized_array_property_name}"
+                parseModel "${loc_type}" "${loc_array_items}"
             fi
 
             if getSwiftType "$loc_array_subtype"; then
@@ -415,4 +427,3 @@ done
 
 ################################# Done #################################
 printf "\n${green_color}Done${no_color}\n\n"
-
