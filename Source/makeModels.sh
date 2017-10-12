@@ -25,20 +25,20 @@ company_name="<#COMPANY_NAME#>" # Company name for header
 
 # Params parsing
 usage() {
-    echo "Swagger JSON spec to Swift ObjectMapper models converter"
-    echo ""
-    echo "./makeModels.sh"
-    echo "\t-h\t--help\t\t\t\t\tShow help"
-    echo "\t-f\t--file\t\t\t\t\tSwagger spec JSON file name. Default - 'swagger.json'."
-    echo "\t-o\t--output-dir\t\t\t\t\tModels output directory. Default - same as script file location."
-    echo "\t-t\t--type-casting-enabled\t\t\tEnable type casting? Default - true."
-    echo "\t-m\t--model-name\t\t\t\t\tSpecify concrete model name to parse."
-    echo "\t-de\t--describable-enabled\t\t\tAdd Describable protocol conformance? Default - true."
-    echo "\t-a\t--assert-values\t\t\t\tAdd value assertion checks? Only asserts mandatory values. Default - true."
-    echo "\t-p\t--project-name\t\t\t\tProject name for header. Default - <#PROJECT_NAME#>."
-    echo "\t-u\t--user-name\t\t\t\tCompany name for header. Default - $USER or git user name."
-    echo "\t-c\t--company-name\t\t\t\tCompany name for header. Default - <#COMPANY_NAME#>."
-    echo ""
+    echo -e "Swagger JSON spec to Swift ObjectMapper models converter"
+    echo -e ""
+    echo -e "./makeModels.sh"
+    echo -e "\t-h\t--help\t\t\t\t\tShow help"
+    echo -e "\t-f\t--file\t\t\t\t\tSwagger spec JSON file name. Default - 'swagger.json'."
+    echo -e "\t-o\t--output-dir\t\t\t\tModels output directory. Default - same as script file location."
+    echo -e "\t-t\t--type-casting-enabled\t\t\tEnable type casting? Default - true."
+    echo -e "\t-m\t--model-name\t\t\t\tSpecify concrete model name to parse."
+    echo -e "\t-de\t--describable-enabled\t\t\tAdd Describable protocol conformance? Default - true."
+    echo -e "\t-a\t--assert-values\t\t\t\tAdd value assertion checks? Only asserts mandatory values. Default - true."
+    echo -e "\t-p\t--project-name\t\t\t\tProject name for header. Default - <#PROJECT_NAME#>."
+    echo -e "\t-u\t--user-name\t\t\t\tCompany name for header. Default - \$USER or git user name."
+    echo -e "\t-c\t--company-name\t\t\t\tCompany name for header. Default - <#COMPANY_NAME#>."
+    echo -e ""
 }
 
 assertBoolParam() {

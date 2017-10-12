@@ -6,9 +6,40 @@ This repository contains two bash command files to generate [ObjectMapper](https
 
 Check Source/Models for generated example ObjectMapper models or Source/RealmModels for Realm with ObjectMapper models.
 
-To generate ObjectMapper models just run `makeModels.command`. To generate Realm with ObjectMapper models run `makeRealmModels.command`. By default it uses `swagger.json` file from same directory but you could pass other filename as first parameter.
+To generate ObjectMapper models just run `makeModels.command`. To generate Realm with ObjectMapper models run `makeRealmModels.command`. By default it uses `swagger.json` file from same directory but you could pass other filename.
 
-Those scripts contains some more options, check inside for them!
+```
+$ bash makeModels.sh --help
+Swagger JSON spec to Swift ObjectMapper models converter
+
+./makeModels.sh
+    -h    --help                    Show help
+    -f    --file                    Swagger spec JSON file name. Default - 'swagger.json'.
+    -o    --output-dir              Models output directory. Default - same as script file location.
+    -t    --type-casting-enabled    Enable type casting? Default - true.
+    -m    --model-name              Specify concrete model name to parse.
+    -de    --describable-enabled    Add Describable protocol conformance? Default - true.
+    -a    --assert-values           Add value assertion checks? Only asserts mandatory values. Default - true.
+    -p    --project-name            Project name for header. Default - <#PROJECT_NAME#>.
+    -u    --user-name               Company name for header. Default - $USER or git user name.
+    -c    --company-name            Company name for header. Default - <#COMPANY_NAME#>.
+```
+
+```
+$ bash makeRealmModels.sh --help
+Swagger JSON spec to Swift ObjectMapper models converter
+
+./makeModels.sh
+    -h    --help                    Show help
+    -f    --file                    Specify swagger spec JSON file name. Default - 'swagger.json'.
+    -o    --output-dir              Models output directory. Default - same as script file location.
+    -t    --type-casting-enabled    Enable type casting? Default - true.
+    -a    --assert-values           Add value assertion checks? Only asserts mandatory values. Default - true.
+    -oi    --override-isEqual       Override Realm implementation of objects equality with properties comparison? Default - true.
+    -p    --project-name            Project name for header. Default - <#PROJECT_NAME#>.
+    -u    --user-name               Company name for header. Default - $USER or git user name.
+    -c    --company-name            Company name for header. Default - <#COMPANY_NAME#>.
+```
 
 You can view/edit sample spec or create your own in [Swagger Editor](http://editor.swagger.io/)
 
