@@ -16,9 +16,10 @@ Swagger JSON spec to Swift ObjectMapper models converter
     -h    --help                    Show help
     -f    --file                    Swagger spec JSON file name. Default - 'swagger.json'.
     -o    --output-dir              Models output directory. Default - same as script file location.
+    -mp   --model-prefix            Models prefix. Default - no prefix.
     -t    --type-casting-enabled    Enable type casting? Default - true.
-    -m    --model-name              Specify concrete model name to parse.
-    -de    --describable-enabled    Add Describable protocol conformance? Default - true.
+    -mn   --model-name              Specify concrete model name to parse.
+    -de   --describable-enabled     Add Describable protocol conformance? Default - true.
     -a    --assert-values           Add value assertion checks? Only asserts mandatory values. Default - true.
     -p    --project-name            Project name for header. Default - <#PROJECT_NAME#>.
     -u    --user-name               Company name for header. Default - $USER or git user name.

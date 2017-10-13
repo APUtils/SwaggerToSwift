@@ -28,16 +28,17 @@ usage() {
     echo -e "Swagger JSON spec to Swift ObjectMapper models converter"
     echo -e ""
     echo -e "./makeModels.sh"
-    echo -e "\t-h\t--help\t\t\t\t\tShow help"
-    echo -e "\t-f\t--file\t\t\t\t\tSwagger spec JSON file name. Default - 'swagger.json'."
-    echo -e "\t-o\t--output-dir\t\t\t\tModels output directory. Default - same as script file location."
-    echo -e "\t-t\t--type-casting-enabled\t\t\tEnable type casting? Default - true."
-    echo -e "\t-m\t--model-name\t\t\t\tSpecify concrete model name to parse."
-    echo -e "\t-de\t--describable-enabled\t\t\tAdd Describable protocol conformance? Default - true."
-    echo -e "\t-a\t--assert-values\t\t\t\tAdd value assertion checks? Only asserts mandatory values. Default - true."
-    echo -e "\t-p\t--project-name\t\t\t\tProject name for header. Default - <#PROJECT_NAME#>."
-    echo -e "\t-u\t--user-name\t\t\t\tCompany name for header. Default - \$USER or git user name."
-    echo -e "\t-c\t--company-name\t\t\t\tCompany name for header. Default - <#COMPANY_NAME#>."
+    echo -e "    -h    --help                    Show help"
+    echo -e "    -f    --file                    Swagger spec JSON file name. Default - 'swagger.json'."
+    echo -e "    -o    --output-dir              Models output directory. Default - same as script file location."
+    echo -e "    -mp   --model-prefix            Models prefix. Default - no prefix."
+    echo -e "    -t    --type-casting-enabled    Enable type casting? Default - true."
+    echo -e "    -mn   --model-name              Specify concrete model name to parse."
+    echo -e "    -de   --describable-enabled     Add Describable protocol conformance? Default - true."
+    echo -e "    -a    --assert-values           Add value assertion checks? Only asserts mandatory values. Default - true."
+    echo -e "    -p    --project-name            Project name for header. Default - <#PROJECT_NAME#>."
+    echo -e "    -u    --user-name               Company name for header. Default - \$USER or git user name."
+    echo -e "    -c    --company-name            Company name for header. Default - <#COMPANY_NAME#>."
     echo -e ""
 }
 
@@ -66,12 +67,16 @@ while [[ "$1" != "" ]]; do
             output_dir=$VALUE
             shift 2
             ;;
+        -mp | --model-prefix)
+            model_prefix=$VALUE
+            shift 2
+            ;;
         -t | --type-casting-enabled)
             assertBoolParam $VALUE
             type_casting_enabled=$VALUE
             shift 2
             ;;
-        -m | --model-name)
+        -mn | --model-name)
             model_name=$VALUE
             shift 2
             ;;
@@ -227,7 +232,10 @@ parseModel() {
 
         # Handle object type
         if [ "$loc_type" == "null" ]; then
+            # Get object name from refference
             loc_type="$(echo $loc_model_dictionary | jq -r .properties.${loc_property}.\"\$ref\" | cut -d/ -f3)"
+            # Append prefix
+            loc_type="${model_prefix}${loc_type}"
         elif [ "$loc_type" == "object" ]; then
             # Parse inner model type
             local loc_capitalized_property_name="$(tr '[:lower:]' '[:upper:]' <<< ${loc_property:0:1})${loc_property:1}"
@@ -253,7 +261,10 @@ parseModel() {
 
             # Handle object subtype
             if [ "$loc_array_subtype" == "null" ]; then
+                # Get object name from refference
                 loc_type="$(echo $loc_model_dictionary | jq -r .properties.${loc_property}.items.\"\$ref\" | cut -d/ -f3)"
+                # Append prefix
+                loc_type="${model_prefix}${loc_type}"
             elif [ "$loc_array_subtype" == "object" ]; then
                 # Parse inner model type
                 local loc_capitalized_array_property_name="$(tr '[:lower:]' '[:upper:]' <<< ${loc_property:0:1})${loc_property:1}"
@@ -420,7 +431,7 @@ for definition in $definitions; do
     definition_dictionary="$(echo $definitions_dictionary | jq -r .$definition)"
 
     # Parse model
-    parseModel "${definition}" "${definition_dictionary}"
+    parseModel "${model_prefix}${definition}" "${definition_dictionary}"
 
     printf " ${green_color}OK${no_color}\n"
 done

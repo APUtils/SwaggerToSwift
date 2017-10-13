@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 `SwaggerToSwift` adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.1](https://github.com/APUtils/SwaggerToSwift/releases/tag/1.1.1)
+Released on 10/13/2017.
+
+#### Added
+- Added model prefix console param
+
+
 ## [1.1.0](https://github.com/APUtils/SwaggerToSwift/releases/tag/1.1.0)
 Released on 10/12/2017.
 
