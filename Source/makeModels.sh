@@ -137,15 +137,19 @@ getSwiftType () {
 
 # $1 - property name. Sets $allowed_property_name.
 getAllowedPropertyName () {
-    allowed_property_name=$1
+    if [[ $describable_enabled == true && "$1" == "description" ]]; then
+        allowed_property_name="descriptionString"
+    else
+        allowed_property_name=$1
 
-    # Change underscore_name to underscoreName
-    regex='(.*)_+(.*)'
-    while [[ $allowed_property_name =~ $regex ]]; do
-        second_part=${BASH_REMATCH[2]}
-        capitalized_second_part="$(tr '[:lower:]' '[:upper:]' <<< ${second_part:0:1})${second_part:1}"
-        allowed_property_name=${BASH_REMATCH[1]}${capitalized_second_part}
-    done
+        # Change underscore_name to underscoreName
+        regex='(.*)_+(.*)'
+        while [[ $allowed_property_name =~ $regex ]]; do
+            second_part=${BASH_REMATCH[2]}
+            capitalized_second_part="$(tr '[:lower:]' '[:upper:]' <<< ${second_part:0:1})${second_part:1}"
+            allowed_property_name=${BASH_REMATCH[1]}${capitalized_second_part}
+        done
+    fi
 }
 
 # $1 - format, $2 - swift type. Sets $transform_type
