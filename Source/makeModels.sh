@@ -163,6 +163,9 @@ getSwiftTypeAndTransformType () {
     elif [ $1 == "timestamp" ]; then
         swift_type="Date"
         transform_type="Timestamp"
+    elif [ $1 == "url" ]; then
+        swift_type="URL"
+        transform_type="URL"
     else
         swift_type=$2
         transform_type=$2
